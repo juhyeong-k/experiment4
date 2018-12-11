@@ -15,12 +15,12 @@ SoftwareSerial mySerial(blueTx, blueRx);  //시리얼 통신을 위한 객체선
 #define R1 14 //A0
 #define R2 15 //A1
 
-#define L2_correction 0
-#define L1_correction 25
+#define L2_correction 10
+#define L1_correction 15
 #define R1_correction 10
-#define R2_correction -250
+#define R2_correction -300
 
-#define threshold 100
+#define threshold 250
 #define APEX_THRESHOLD 600
 int crossFlag;
 int sensingResult;
@@ -28,8 +28,8 @@ int sensingResult;
 void setup() {
   Serial.begin(9600);
   mySerial.begin(9600); //블루투스 시리얼
-  servoRight.attach(12);
-  servoLeft.attach(13);
+  servoRight.attach(13);
+  servoLeft.attach(12);
   crossFlag = 0;
 }
 void loop() {
@@ -90,28 +90,28 @@ uint8_t getSensingResult() {
   return status;
 }
 void moveFoward() {
-  servoRight.writeMicroseconds(1700);//1700
-  servoLeft.writeMicroseconds(1300);//1300
+  servoLeft.writeMicroseconds(1700);//1700
+  servoRight.writeMicroseconds(1300);//1300
   Serial.println("moveFoward");
 }
 void moveRight() {
-  servoRight.writeMicroseconds(1700);//1700
-  servoLeft.writeMicroseconds(1450);//1500
+  servoLeft.writeMicroseconds(1700);//1700
+  servoRight.writeMicroseconds(1450);//1500
   Serial.println("moveRight");
 }
 void moveLeft() {
-  servoRight.writeMicroseconds(1550);//1500
-  servoLeft.writeMicroseconds(1300);//1300
+  servoLeft.writeMicroseconds(1550);//1500
+  servoRight.writeMicroseconds(1300);//1300
   Serial.println("moveLeft");
 }
 void turnLeft() {
-  servoRight.writeMicroseconds(1450);//1600
-  servoLeft.writeMicroseconds(1300);//1400
+  servoLeft.writeMicroseconds(1450);//1600
+  servoRight.writeMicroseconds(1300);//1400
   Serial.println("turnLeft");
 }
 void moveStop() {
-  servoRight.writeMicroseconds(1495);//
-  servoLeft.writeMicroseconds(1500);//
+  servoLeft.writeMicroseconds(1495);//
+  servoRight.writeMicroseconds(1500);//
   Serial.println("moveStop");
 }
 long RCtime(int sensPin)
