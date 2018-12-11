@@ -105,7 +105,6 @@ void moveLeft() {
   Serial.println("moveLeft");
 }
 void turnLeft() {
-  mySerial.println("Result : ");
   servoRight.writeMicroseconds(1450);//1600
   servoLeft.writeMicroseconds(1300);//1400
   Serial.println("turnLeft");
