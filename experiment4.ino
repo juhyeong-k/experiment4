@@ -7,8 +7,8 @@ Servo servoLeft;
 
 #define L2 8
 #define L1 9
-#define R1 A0
-#define R2 A1
+#define R1 14 //A0
+#define R2 15 //A1
 
 #define L2_correction 0
 #define L1_correction 25
@@ -17,6 +17,7 @@ Servo servoLeft;
 
 int threshold;
 int crossFlag;
+int sensingResult;
 
 void setup() {
   Serial.begin(9600);
@@ -26,31 +27,8 @@ void setup() {
   crossFlag = 0;
 }
 void loop() {
-  int status = 0;
-  long crossBuffer = 0;
   moveStop();
-  crossBuffer += RCtime(8);
-  if( RCtime(8) > threshold) status |= 1 << 3;
-  else status &= 0b0111;
-  Serial.print(RCtime(8));
-  Serial.print(" | ");
-
-  crossBuffer += RCtime(9);
-  if( RCtime(9) > threshold) status |= 1 << 2;
-  else status &= 0b1011;
-  Serial.print(RCtime(9));
-  Serial.print(" | ");
-
-  crossBuffer += RCtime(A0);
-  if( RCtime(A0) > threshold) status |= 1 << 1;
-  else status &= 0b1101;
-  Serial.print(RCtime(A0));
-  Serial.print(" | ");
-
-  crossBuffer += RCtime(A1);
-  if( RCtime(A1) > threshold) status |= 1;
-  else status &= 0b1110;
-  Serial.println(RCtime(A1));
+  getSensingResult();
   /*
   moveLeft();
   
@@ -73,6 +51,41 @@ void loop() {
     }
   }
   */
+}
+uint8_t getSensingResult() {
+  int status = 0;
+  long crossBuffer = 0;
+  
+  sensingResult = RCtime(8);
+  crossBuffer += sensingResult;
+  if( sensingResult > (threshold + L2_correction) ) status |= 1 << 3;
+  else status &= 0b0111;
+  Serial.print(sensingResult);
+  Serial.print(" | ");
+  
+  sensingResult = RCtime(9);
+  crossBuffer += sensingResult;
+  if( sensingResult > (threshold + L1_correction) ) status |= 1 << 2;
+  else status &= 0b1011;
+  Serial.print(sensingResult);
+  Serial.print(" | ");
+
+  sensingResult = RCtime(A0);
+  crossBuffer += sensingResult;
+  if( sensingResult > (threshold + R1_correction) ) status |= 1 << 1;
+  else status &= 0b1101;
+  Serial.print(sensingResult);
+  Serial.print(" | ");
+
+  sensingResult = RCtime(A1);
+  crossBuffer += sensingResult;
+  if( sensingResult > (threshold + R2_correction) ) status |= 1;
+  else status &= 0b1110;
+  Serial.println(sensingResult);
+
+  if(crossBuffer > 1200) status |= 0b10000;
+
+  return status;
 }
 void moveFoward() {
   servoRight.writeMicroseconds(1700);
