@@ -52,28 +52,28 @@ uint8_t getSensingResult() {
   int status = 0;
   long crossBuffer = 0;
   
-  sensingResult = RCtime(8)+ L2_correction;
+  sensingResult = RCtime(L2)+ L2_correction;
   crossBuffer += sensingResult;
   if( sensingResult > (threshold + L2_correction) ) status |= 1 << 3;
   else status &= 0b0111;
   Serial.print(sensingResult);
   Serial.print(" | ");
   
-  sensingResult = RCtime(9)+ L1_correction;
+  sensingResult = RCtime(L1)+ L1_correction;
   crossBuffer += sensingResult;
   if( sensingResult > (threshold + L1_correction) ) status |= 1 << 2;
   else status &= 0b1011;
   Serial.print(sensingResult);
   Serial.print(" | ");
 
-  sensingResult = RCtime(A0)+ R1_correction;
+  sensingResult = RCtime(R1)+ R1_correction;
   crossBuffer += sensingResult;
   if( sensingResult > (threshold + R1_correction) ) status |= 1 << 1;
   else status &= 0b1101;
   Serial.print(sensingResult);
   Serial.print(" | ");
 
-  sensingResult = RCtime(A1)+ R2_correction;
+  sensingResult = RCtime(R2)+ R2_correction;
   crossBuffer += sensingResult;
   if( sensingResult > threshold) status |= 1;
   else status &= 0b1110;
