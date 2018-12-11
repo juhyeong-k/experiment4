@@ -16,9 +16,9 @@ SoftwareSerial mySerial(blueTx, blueRx);  //시리얼 통신을 위한 객체선
 #define R2 15 //A1
 
 #define L2_correction 10
-#define L1_correction 15
-#define R1_correction 10
-#define R2_correction -300
+#define L1_correction 5
+#define R1_correction 0
+#define R2_correction -190
 
 #define threshold 130
 #define APEX_THRESHOLD 800
@@ -26,7 +26,7 @@ int crossFlag;
 int sensingResult;
 int turnLeftTimes;
 bool isTurning;
-int velocity = 200;
+int velocity = 30;
 
 void setup() {
   Serial.begin(9600);
@@ -43,21 +43,22 @@ void loop() {
   if(result & 0b10000) {
     turnLeft();
     turnLeftTimes++;
-    if(turnLeftTimes == 15) {
+    if(turnLeftTimes == 27) {
       isTurning = true;
-      /*
-      velocity += 50;
-      if(velocity == 250) velocity = 50;
+      if(velocity == 30 ) velocity = 60;
+      else if(velocity == 60) velocity = 200;
+      else if(velocity == 200) velocity = 30;
       mySerial.print("Velocity : ");
       mySerial.println(velocity);
-      */
     }
   }
   else {
-    turnLeftTimes = 0;
     result &= 0b00001111;
     
-    if(result & 0b00000001) isTurning = false;
+    if(result & 0b00000001) {
+      turnLeftTimes = 0;
+      isTurning = false;
+    }
     
     if(isTurning) {
       turnLeftTimes++;
@@ -90,33 +91,25 @@ uint8_t getSensingResult() {
   crossBuffer += sensingResult;
   if( sensingResult > (threshold + L2_correction) ) Status |= 1 << 3;
   else Status &= 0b00000111;
-  /*
   Serial.print(sensingResult);
   Serial.print(" | ");
-  */
   sensingResult = RCtime(L1)+ L1_correction;
   crossBuffer += sensingResult;
   if( sensingResult > (threshold + L1_correction) ) Status |= 1 << 2;
   else Status &= 0b00001011;
-  /*
   Serial.print(sensingResult);
   Serial.print(" | ");
-  */
   sensingResult = RCtime(R1)+ R1_correction;
   crossBuffer += sensingResult;
   if( sensingResult > (threshold + R1_correction) ) Status |= 1 << 1;
   else Status &= 0b00001101;
-  /*
   Serial.print(sensingResult);
   Serial.print(" | ");
-  */
   sensingResult = RCtime(R2)+ R2_correction;
   crossBuffer += sensingResult;
   if( sensingResult > threshold) Status |= 1;
   else Status &= 0b00001110;
-  /*
   Serial.println(sensingResult);
-  */
   if( (crossBuffer < APEX_THRESHOLD) && !(Status & 0b00000110) ) Status |= 0b00010000;
 
   return Status;
