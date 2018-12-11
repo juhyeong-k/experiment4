@@ -36,28 +36,31 @@ void setup() {
   crossFlag = 0;
   turnLeftTimes = 0;
   isTurning = false;
+  mySerial.println("Boot");
 }
 void loop() {
   uint8_t result = getSensingResult();
   if(result & 0b10000) {
     turnLeft();
     turnLeftTimes++;
-    if(turnLeftTimes == 5) {
-      if(velocity == 200) velocity = 30;
-      else if(velocity == 30) velocity = 60;
-      else velocity = 200;
+    if(turnLeftTimes == 15) {
       isTurning = true;
+      /*
+      velocity += 50;
+      if(velocity == 250) velocity = 50;
       mySerial.print("Velocity : ");
       mySerial.println(velocity);
+      */
     }
   }
   else {
     turnLeftTimes = 0;
-    result &= 0b01111;
+    result &= 0b00001111;
     
-    if(result & 0b0001) isTurning = false;
+    if(result & 0b00000001) isTurning = false;
     
     if(isTurning) {
+      turnLeftTimes++;
       turnLeft();
     }
     else {
@@ -80,43 +83,43 @@ void loop() {
   }
 }
 uint8_t getSensingResult() {
-  int status = 0;
-  long crossBuffer = 0;
+  uint8_t Status = 0;
+  int crossBuffer = 0;
   
   sensingResult = RCtime(L2)+ L2_correction;
   crossBuffer += sensingResult;
-  if( sensingResult > (threshold + L2_correction) ) status |= 1 << 3;
-  else status &= 0b0111;
+  if( sensingResult > (threshold + L2_correction) ) Status |= 1 << 3;
+  else Status &= 0b00000111;
   /*
   Serial.print(sensingResult);
   Serial.print(" | ");
   */
   sensingResult = RCtime(L1)+ L1_correction;
   crossBuffer += sensingResult;
-  if( sensingResult > (threshold + L1_correction) ) status |= 1 << 2;
-  else status &= 0b1011;
+  if( sensingResult > (threshold + L1_correction) ) Status |= 1 << 2;
+  else Status &= 0b00001011;
   /*
   Serial.print(sensingResult);
   Serial.print(" | ");
   */
   sensingResult = RCtime(R1)+ R1_correction;
   crossBuffer += sensingResult;
-  if( sensingResult > (threshold + R1_correction) ) status |= 1 << 1;
-  else status &= 0b1101;
+  if( sensingResult > (threshold + R1_correction) ) Status |= 1 << 1;
+  else Status &= 0b00001101;
   /*
   Serial.print(sensingResult);
   Serial.print(" | ");
   */
   sensingResult = RCtime(R2)+ R2_correction;
   crossBuffer += sensingResult;
-  if( sensingResult > threshold) status |= 1;
-  else status &= 0b1110;
+  if( sensingResult > threshold) Status |= 1;
+  else Status &= 0b00001110;
   /*
   Serial.println(sensingResult);
   */
-  if( (crossBuffer < APEX_THRESHOLD) && !(status & 0b0110) ) status |= 0b10000;
+  if( (crossBuffer < APEX_THRESHOLD) && !(Status & 0b00000110) ) Status |= 0b00010000;
 
-  return status;
+  return Status;
 }
 void moveFoward(int velocity) {
   servoLeft.writeMicroseconds(1495+velocity);
