@@ -37,7 +37,17 @@ void setup() {
 }
 void loop() {
   uint8_t result = getSensingResult();
-  if(result & 0b10000) turnLeft();
+  if(result & 0b10000) {
+    turnLeft();
+    turnLeftTimes++;
+    if(turnLeftTimes == 5) {
+      if(velocity == 200) velocity = 30;
+      else if(velocity == 30) velocity = 60;
+      else velocity = 200;
+      mySerial.print("Velocity : ");
+      mySerial.println(velocity);
+    }
+  }
   else {
     turnLeftTimes = 0;
     result &= 0b01111;
@@ -56,11 +66,6 @@ void loop() {
       case 0b1111 : moveFoward(velocity); break;
       default : break;
     }
-  }
-  if(turnLeftTimes == 4) {
-    if(velocity == 200) velocity = 30;
-    else velocity = 200;
-    turnLeftTimes = 0;
   }
 }
 uint8_t getSensingResult() {
@@ -94,7 +99,7 @@ uint8_t getSensingResult() {
   else status &= 0b1110;
   Serial.println(sensingResult);
 
-  if( (crossBuffer < APEX_THRESHOLD) && !(status & 0b1111) ) status |= 0b10000;
+  if( (crossBuffer < APEX_THRESHOLD) && !(status & 0b0110) ) status |= 0b10000;
 
   return status;
 }
@@ -116,7 +121,6 @@ void moveLeft(int velocity) {
 void turnLeft() {
   servoLeft.writeMicroseconds(1450);
   servoRight.writeMicroseconds(1300);
-  turnLeftTimes++;
   Serial.println("turnLeft");
 }
 void moveStop() {
