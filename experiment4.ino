@@ -24,6 +24,8 @@ SoftwareSerial mySerial(blueTx, blueRx);  //시리얼 통신을 위한 객체선
 #define APEX_THRESHOLD 800
 int crossFlag;
 int sensingResult;
+int turnLeftTimes;
+int velocity = 200;
 
 void setup() {
   Serial.begin(9600);
@@ -31,27 +33,34 @@ void setup() {
   servoRight.attach(13);
   servoLeft.attach(12);
   crossFlag = 0;
+  turnLeftTimes = 0;
 }
 void loop() {
   uint8_t result = getSensingResult();
   if(result & 0b10000) turnLeft();
   else {
+    turnLeftTimes = 0;
     result &= 0b01111;
     switch(result)
     {
-      case 0b0000 : moveFoward(); break;
-      case 0b1000 : moveLeft(); break;
-      case 0b1100 : moveLeft(); break;
-      case 0b1110 : moveLeft(); break;
-      case 0b0100 : moveLeft(); break;
-      case 0b0110 : moveFoward(); break;
-      case 0b0010 : moveRight(); break;
-      case 0b0111 : moveRight(); break;
-      case 0b0011 : moveRight(); break;
-      case 0b0001 : moveRight(); break;
-      case 0b1111 : moveFoward(); break;
+      case 0b0000 : moveFoward(velocity); break;
+      case 0b1000 : moveLeft(velocity); break;
+      case 0b1100 : moveLeft(velocity); break;
+      case 0b1110 : moveLeft(velocity); break;
+      case 0b0100 : moveLeft(velocity); break;
+      case 0b0110 : moveFoward(velocity); break;
+      case 0b0010 : moveRight(velocity); break;
+      case 0b0111 : moveRight(velocity); break;
+      case 0b0011 : moveRight(velocity); break;
+      case 0b0001 : moveRight(velocity); break;
+      case 0b1111 : moveFoward(velocity); break;
       default : break;
     }
+  }
+  if(turnLeftTimes == 2) {
+    if(velocity == 400) velocity = 200;
+    else velocity+=100;
+    turnLeftTimes = 0;
   }
 }
 uint8_t getSensingResult() {
@@ -89,24 +98,25 @@ uint8_t getSensingResult() {
 
   return status;
 }
-void moveFoward() {
-  servoLeft.writeMicroseconds(1700);//1700
-  servoRight.writeMicroseconds(1300);//1300
+void moveFoward(int velocity) {
+  servoLeft.writeMicroseconds(1495+velocity);//1700
+  servoRight.writeMicroseconds(1500-velocity);//1300
   Serial.println("moveFoward");
 }
-void moveRight() {
-  servoLeft.writeMicroseconds(1700);//1700
-  servoRight.writeMicroseconds(1450);//1500
+void moveRight(int velocity) {
+  servoLeft.writeMicroseconds(1495+velocity);//1700
+  servoRight.writeMicroseconds(1500-velocity/4);//1500
   Serial.println("moveRight");
 }
-void moveLeft() {
-  servoLeft.writeMicroseconds(1550);//1500
-  servoRight.writeMicroseconds(1300);//1300
+void moveLeft(int velocity) {
+  servoLeft.writeMicroseconds(1495+velocity/4);//1500
+  servoRight.writeMicroseconds(1500-velocity);//1300
   Serial.println("moveLeft");
 }
 void turnLeft() {
   servoLeft.writeMicroseconds(1450);//1600
   servoRight.writeMicroseconds(1300);//1400
+  turnLeftTimes++;
   Serial.println("turnLeft");
 }
 void moveStop() {
