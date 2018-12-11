@@ -57,9 +57,9 @@ void loop() {
       default : break;
     }
   }
-  if(turnLeftTimes == 2) {
-    if(velocity == 400) velocity = 200;
-    else velocity+=100;
+  if(turnLeftTimes == 4) {
+    if(velocity == 200) velocity = 30;
+    else velocity = 200;
     turnLeftTimes = 0;
   }
 }
@@ -99,29 +99,29 @@ uint8_t getSensingResult() {
   return status;
 }
 void moveFoward(int velocity) {
-  servoLeft.writeMicroseconds(1495+velocity);//1700
-  servoRight.writeMicroseconds(1500-velocity);//1300
+  servoLeft.writeMicroseconds(1495+velocity);
+  servoRight.writeMicroseconds(1500-velocity);
   Serial.println("moveFoward");
 }
 void moveRight(int velocity) {
-  servoLeft.writeMicroseconds(1495+velocity);//1700
-  servoRight.writeMicroseconds(1500-velocity/4);//1500
+  servoLeft.writeMicroseconds(1495+velocity);
+  servoRight.writeMicroseconds(1500-velocity/4);
   Serial.println("moveRight");
 }
 void moveLeft(int velocity) {
-  servoLeft.writeMicroseconds(1495+velocity/4);//1500
-  servoRight.writeMicroseconds(1500-velocity);//1300
+  servoLeft.writeMicroseconds(1495+velocity/4);
+  servoRight.writeMicroseconds(1500-velocity);
   Serial.println("moveLeft");
 }
 void turnLeft() {
-  servoLeft.writeMicroseconds(1450);//1600
-  servoRight.writeMicroseconds(1300);//1400
+  servoLeft.writeMicroseconds(1450);
+  servoRight.writeMicroseconds(1300);
   turnLeftTimes++;
   Serial.println("turnLeft");
 }
 void moveStop() {
-  servoLeft.writeMicroseconds(1495);//
-  servoRight.writeMicroseconds(1500);//
+  servoLeft.writeMicroseconds(1495);
+  servoRight.writeMicroseconds(1500);
   Serial.println("moveStop");
 }
 long RCtime(int sensPin)
