@@ -15,10 +15,10 @@ SoftwareSerial mySerial(blueTx, blueRx);  //시리얼 통신을 위한 객체선
 #define R1 14 //A0
 #define R2 15 //A1
 
-#define L2_correction 10
-#define L1_correction 5
-#define R1_correction 0
-#define R2_correction -190
+int L2_correction;
+int L1_correction;
+int R1_correction;
+int R2_correction;
 
 #define threshold 130
 #define APEX_THRESHOLD 800
@@ -26,24 +26,32 @@ int crossFlag;
 int sensingResult;
 int turnLeftTimes;
 bool isTurning;
-int velocity = 30;
+int velocity = 200;
 
 void setup() {
   Serial.begin(9600);
   mySerial.begin(9600); //블루투스 시리얼
   servoRight.attach(13);
   servoLeft.attach(12);
+  servoLeft.writeMicroseconds(1495);
+  servoRight.writeMicroseconds(1500);
   crossFlag = 0;
   turnLeftTimes = 0;
   isTurning = false;
   mySerial.println("Boot");
+  sensingInit();
+  while(1) {
+    if( mySerial.available() ) {
+      if( mySerial.read() == '1' ) break;
+    }
+  }
 }
 void loop() {
   uint8_t result = getSensingResult();
   if(result & 0b10000) {
     turnLeft();
     turnLeftTimes++;
-    if(turnLeftTimes == 27) {
+    if(turnLeftTimes == 20) {
       isTurning = true;
       if(velocity == 30 ) velocity = 60;
       else if(velocity == 60) velocity = 200;
@@ -82,6 +90,48 @@ void loop() {
       }
     }
   }
+}
+void sensingInit() {
+  int i;
+  long L2_temp, L1_temp, R1_temp, R2_temp;
+  L2_temp = L1_temp = R1_temp = R2_temp = 0;
+  for(i = 0; i < 50; i++) {
+    RCtime(L2);
+    RCtime(L1);
+    RCtime(R1);
+    RCtime(R2);
+  }
+  for(i = 0; i < 50; i++) {
+    L2_temp += RCtime(L2);
+    L1_temp += RCtime(L1);
+    R1_temp += RCtime(R1);
+    R2_temp += RCtime(R2);
+  }
+  L2_temp /= 50;
+  L1_temp /= 50;
+  R1_temp /= 50;
+  R2_temp /= 50;
+  
+  Serial.print(L2_temp);
+  Serial.print(" | ");
+  Serial.print(L1_temp);
+  Serial.print(" | ");
+  Serial.print(R1_temp);
+  Serial.print(" | ");
+  Serial.println(R2_temp);
+  
+  L2_correction = 100 - L2_temp;
+  L1_correction = 100 - L1_temp;
+  R1_correction = 100 - R1_temp;
+  R2_correction = 100 - R2_temp;
+  
+  Serial.print(RCtime(L2) + L2_correction);
+  Serial.print(" | ");
+  Serial.print(RCtime(L1) + L1_correction);
+  Serial.print(" | ");
+  Serial.print(RCtime(R1) + R1_correction);
+  Serial.print(" | ");
+  Serial.println(RCtime(R2) + R2_correction);
 }
 uint8_t getSensingResult() {
   uint8_t Status = 0;
