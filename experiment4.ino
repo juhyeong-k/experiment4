@@ -1,23 +1,23 @@
+/**
+ *   L2 L1 R1 R2 / 8 9 A0 A1
+ */
 #include <Servo.h>
-
 Servo servoRight;
 Servo servoLeft;
+
+#define L2 8
+#define L1 9
+#define R1 A0
+#define R2 A1
+
+#define L2_correction 0
+#define L1_correction 25
+#define R1_correction 10
+#define R2_correction -120
+
 int threshold;
 int crossFlag;
-long RCtime(int sensPin)
-{
-  long result = 0; 
-  pinMode(sensPin, OUTPUT); // make pin OUTPUT
-  digitalWrite(sensPin, HIGH); // make pin HIGH to discharge capacitor - study the schematic
-  delay(1); // wait a ms to make sure cap is discharged
-  pinMode(sensPin, INPUT); // turn pin into an input and time till pin goes low
-  digitalWrite(sensPin, LOW); // turn pullups off - or it won't work
-  while(digitalRead(sensPin))
-  { 
-    result++; 
-  }
-  return result;
-}
+
 void setup() {
   Serial.begin(9600);
   servoRight.attach(12);
@@ -25,31 +25,10 @@ void setup() {
   threshold = 110;
   crossFlag = 0;
 }
-void moveFoward() {
-  servoRight.writeMicroseconds(1700);
-  servoLeft.writeMicroseconds(1300);
-}
-void moveRight() {
-  servoRight.writeMicroseconds(1700);
-  servoLeft.writeMicroseconds(1500);
-}
-void moveLeft() {
-  servoRight.writeMicroseconds(1500);
-  servoLeft.writeMicroseconds(1300);
-}
-void turnLeft() {
-  moveLeft();
-  delay(1200);
-  crossFlag = 0;
-}
-void moveStop() {
-  servoRight.writeMicroseconds(1495);
-  servoLeft.writeMicroseconds(1500);
-}
 void loop() {
   int status = 0;
   long crossBuffer = 0;
-
+  moveStop();
   crossBuffer += RCtime(8);
   if( RCtime(8) > threshold) status |= 1 << 3;
   else status &= 0b0111;
@@ -72,6 +51,7 @@ void loop() {
   if( RCtime(A1) > threshold) status |= 1;
   else status &= 0b1110;
   Serial.println(RCtime(A1));
+  /*
   moveLeft();
   
   if(crossBuffer > 1200) turnLeft();
@@ -92,4 +72,40 @@ void loop() {
       default : break;
     }
   }
+  */
+}
+void moveFoward() {
+  servoRight.writeMicroseconds(1700);
+  servoLeft.writeMicroseconds(1300);
+}
+void moveRight() {
+  servoRight.writeMicroseconds(1700);
+  servoLeft.writeMicroseconds(1500);
+}
+void moveLeft() {
+  servoRight.writeMicroseconds(1500);
+  servoLeft.writeMicroseconds(1300);
+}
+void turnLeft() {
+  moveLeft();
+  delay(1200);
+  crossFlag = 0;
+}
+void moveStop() {
+  servoRight.writeMicroseconds(1495);
+  servoLeft.writeMicroseconds(1500);
+}
+long RCtime(int sensPin)
+{
+  long result = 0; 
+  pinMode(sensPin, OUTPUT); // make pin OUTPUT
+  digitalWrite(sensPin, HIGH); // make pin HIGH to discharge capacitor - study the schematic
+  delay(1); // wait a ms to make sure cap is discharged
+  pinMode(sensPin, INPUT); // turn pin into an input and time till pin goes low
+  digitalWrite(sensPin, LOW); // turn pullups off - or it won't work
+  while(digitalRead(sensPin))
+  { 
+    result++; 
+  }
+  return result;
 }
