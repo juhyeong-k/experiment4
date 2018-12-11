@@ -2,8 +2,13 @@
  *   L2 L1 R1 R2 / 8 9 A0 A1
  */
 #include <Servo.h>
+#include <SoftwareSerial.h> //시리얼통신 라이브러리 호출
 Servo servoRight;
 Servo servoLeft;
+
+int blueTx=2;   //Tx (보내는핀 설정)
+int blueRx=3;   //Rx (받는핀 설정)
+SoftwareSerial mySerial(blueTx, blueRx);  //시리얼 통신을 위한 객체선언
 
 #define L2 8
 #define L1 9
@@ -22,6 +27,7 @@ int sensingResult;
 
 void setup() {
   Serial.begin(9600);
+  mySerial.begin(9600); //블루투스 시리얼
   servoRight.attach(12);
   servoLeft.attach(13);
   crossFlag = 0;
@@ -99,6 +105,7 @@ void moveLeft() {
   Serial.println("moveLeft");
 }
 void turnLeft() {
+  mySerial.println("Result : ");
   servoRight.writeMicroseconds(1450);//1600
   servoLeft.writeMicroseconds(1300);//1400
   Serial.println("turnLeft");
