@@ -15,7 +15,7 @@ Servo servoLeft;
 #define R1_correction 10
 #define R2_correction -250
 
-#define threshold 120
+#define threshold 100
 #define APEX_THRESHOLD 600
 int crossFlag;
 int sensingResult;
