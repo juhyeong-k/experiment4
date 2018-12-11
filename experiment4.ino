@@ -20,8 +20,8 @@ SoftwareSerial mySerial(blueTx, blueRx);  //시리얼 통신을 위한 객체선
 #define R1_correction 10
 #define R2_correction -300
 
-#define threshold 250
-#define APEX_THRESHOLD 600
+#define threshold 150
+#define APEX_THRESHOLD 800
 int crossFlag;
 int sensingResult;
 
@@ -39,7 +39,7 @@ void loop() {
     result &= 0b01111;
     switch(result)
     {
-      case 0b0000 : turnLeft(); break;
+      case 0b0000 : moveFoward(); break;
       case 0b1000 : moveLeft(); break;
       case 0b1100 : moveLeft(); break;
       case 0b1110 : moveLeft(); break;
@@ -85,7 +85,7 @@ uint8_t getSensingResult() {
   else status &= 0b1110;
   Serial.println(sensingResult);
 
-  if( (crossBuffer < APEX_THRESHOLD) && (status & 0b1111) ) status |= 0b10000;
+  if( (crossBuffer < APEX_THRESHOLD) && !(status & 0b1111) ) status |= 0b10000;
 
   return status;
 }
