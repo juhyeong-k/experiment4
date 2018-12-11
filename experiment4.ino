@@ -13,9 +13,10 @@ Servo servoLeft;
 #define L2_correction 0
 #define L1_correction 25
 #define R1_correction 10
-#define R2_correction -300
+#define R2_correction -250
 
-#define threshold 150
+#define threshold 120
+#define APEX_THRESHOLD 600
 int crossFlag;
 int sensingResult;
 
@@ -27,13 +28,12 @@ void setup() {
 }
 void loop() {
   uint8_t result = getSensingResult();
-  
   if(result & 0b10000) turnLeft();
   else {
     result &= 0b01111;
     switch(result)
     {
-      case 0b0000 : moveStop(); break;
+      case 0b0000 : turnLeft(); break;
       case 0b1000 : moveLeft(); break;
       case 0b1100 : moveLeft(); break;
       case 0b1110 : moveLeft(); break;
@@ -79,30 +79,34 @@ uint8_t getSensingResult() {
   else status &= 0b1110;
   Serial.println(sensingResult);
 
-  //if(crossBuffer > 1200) status |= 0b10000;
+  if( (crossBuffer < APEX_THRESHOLD) && (status & 0b1111) ) status |= 0b10000;
 
   return status;
 }
 void moveFoward() {
-  servoRight.writeMicroseconds(1700);
-  servoLeft.writeMicroseconds(1300);
+  servoRight.writeMicroseconds(1700);//1700
+  servoLeft.writeMicroseconds(1300);//1300
+  Serial.println("moveFoward");
 }
 void moveRight() {
-  servoRight.writeMicroseconds(1700);
-  servoLeft.writeMicroseconds(1500);
+  servoRight.writeMicroseconds(1700);//1700
+  servoLeft.writeMicroseconds(1450);//1500
+  Serial.println("moveRight");
 }
 void moveLeft() {
-  servoRight.writeMicroseconds(1500);
-  servoLeft.writeMicroseconds(1300);
+  servoRight.writeMicroseconds(1550);//1500
+  servoLeft.writeMicroseconds(1300);//1300
+  Serial.println("moveLeft");
 }
 void turnLeft() {
-  moveLeft();
-  delay(1200);
-  crossFlag = 0;
+  servoRight.writeMicroseconds(1450);//1600
+  servoLeft.writeMicroseconds(1300);//1400
+  Serial.println("turnLeft");
 }
 void moveStop() {
-  servoRight.writeMicroseconds(1495);
-  servoLeft.writeMicroseconds(1500);
+  servoRight.writeMicroseconds(1495);//
+  servoLeft.writeMicroseconds(1500);//
+  Serial.println("moveStop");
 }
 long RCtime(int sensPin)
 {
