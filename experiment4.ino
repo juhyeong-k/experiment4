@@ -13,9 +13,9 @@ Servo servoLeft;
 #define L2_correction 0
 #define L1_correction 25
 #define R1_correction 10
-#define R2_correction -120
+#define R2_correction -300
 
-int threshold;
+#define threshold 150
 int crossFlag;
 int sensingResult;
 
@@ -23,18 +23,15 @@ void setup() {
   Serial.begin(9600);
   servoRight.attach(12);
   servoLeft.attach(13);
-  threshold = 110;
   crossFlag = 0;
 }
 void loop() {
-  moveStop();
-  getSensingResult();
-  /*
-  moveLeft();
+  uint8_t result = getSensingResult();
   
-  if(crossBuffer > 1200) turnLeft();
+  if(result & 0b10000) turnLeft();
   else {
-    switch(status)
+    result &= 0b01111;
+    switch(result)
     {
       case 0b0000 : moveStop(); break;
       case 0b1000 : moveLeft(); break;
@@ -50,40 +47,39 @@ void loop() {
       default : break;
     }
   }
-  */
 }
 uint8_t getSensingResult() {
   int status = 0;
   long crossBuffer = 0;
   
-  sensingResult = RCtime(8);
+  sensingResult = RCtime(8)+ L2_correction;
   crossBuffer += sensingResult;
   if( sensingResult > (threshold + L2_correction) ) status |= 1 << 3;
   else status &= 0b0111;
   Serial.print(sensingResult);
   Serial.print(" | ");
   
-  sensingResult = RCtime(9);
+  sensingResult = RCtime(9)+ L1_correction;
   crossBuffer += sensingResult;
   if( sensingResult > (threshold + L1_correction) ) status |= 1 << 2;
   else status &= 0b1011;
   Serial.print(sensingResult);
   Serial.print(" | ");
 
-  sensingResult = RCtime(A0);
+  sensingResult = RCtime(A0)+ R1_correction;
   crossBuffer += sensingResult;
   if( sensingResult > (threshold + R1_correction) ) status |= 1 << 1;
   else status &= 0b1101;
   Serial.print(sensingResult);
   Serial.print(" | ");
 
-  sensingResult = RCtime(A1);
+  sensingResult = RCtime(A1)+ R2_correction;
   crossBuffer += sensingResult;
-  if( sensingResult > (threshold + R2_correction) ) status |= 1;
+  if( sensingResult > threshold) status |= 1;
   else status &= 0b1110;
   Serial.println(sensingResult);
 
-  if(crossBuffer > 1200) status |= 0b10000;
+  //if(crossBuffer > 1200) status |= 0b10000;
 
   return status;
 }
